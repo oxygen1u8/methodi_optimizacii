@@ -86,8 +86,38 @@ def method_dihtomia(a, b, eps, delta):
     return res_y
 
 def method_zolotogo_secheniya(a, b, eps):
-    
-    return
+    steps = 0
+    res_x = 0
+    res_y = 0
+    eps_n = (b - a) / 2
+    t = (math.sqrt(5) - 1) / 2
+
+    x1 = a + (3 - math.sqrt(5)) / 2 * (b - a)
+    x2 = a + b - x1
+    # x2 = a + (math.sqrt(5) - 1) / 2 * (b - a)
+    y1 = f(x1)
+    y2 = f(x2)
+
+    while abs(eps_n) > eps:
+        if y1 <= y2:
+            b = x2
+            x2 = x1
+            y2 = y1
+            x1 = a + t * (b - a)
+            y1 = f(x1)
+        else:
+            a = x1
+            x1 = x2
+            y1 = y2
+            x2 = b - t * (b - a)
+            y2 = f(x2)
+        eps_n = t * (b - a)
+        steps += 1
+
+    res_x = (a + b) / 2
+    res_y = f(res_x)
+    print_res(res_x, res_y, steps)
+    return res_y
 
 x = np.linspace(a, b, 1000, endpoint=True)
 y = f(x)
@@ -95,6 +125,7 @@ y = f(x)
 method_perebora(a, b, eps)
 method_porazryadnogo_poiska(a, b, eps, 0.25)
 method_dihtomia(a, b, eps, eps / 2)
+method_zolotogo_secheniya(a, b, eps)
 
 plt.title('f(x) = x^4 + x^2 + x + 1')
 plt.xlabel('X')
