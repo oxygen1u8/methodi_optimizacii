@@ -12,7 +12,7 @@ import sympy as sp
 # 5. Метод парабол             (+)
 # 6. Метод средней точки       (+)
 # 7. Метод хорд                (+)
-# 8. Метод Ньютона             (-)
+# 8. Метод Ньютона             (+)
 
 a = -1
 b = 0
@@ -213,6 +213,24 @@ def method_hord(a, b, eps):
     print_res(res_x, res_y, steps)
     return res_y
 
+def method_newton(a, b, eps, x0):
+    res_y = res_x = steps = 0
+    x = sp.symbols('x')
+    func = f_sym(x)
+    diff_f = sp.diff(func, x)
+
+    while True:
+        steps += 1
+        x1 = x0 - float(diff_f.subs(x, x0)) / float(sp.diff(diff_f, x).subs(x, x0))
+        if abs(x1 - x0) < eps:
+            res_x = x1
+            res_y = f(res_x)
+            break
+        x0 = x1
+
+    print_res(res_x, res_y, steps)
+    return res_y
+
 x = np.linspace(a, b, 1000, endpoint=True)
 y = f(x)
 
@@ -223,6 +241,7 @@ method_zolotogo_secheniya(a, b, eps)
 method_parabol(a, b, eps, 0.25)
 method_sredney_tochki(a, b, eps)
 method_hord(a, b, eps)
+method_newton(a, b, eps, 2)
 
 plt.title('f(x) = x^4 + x^2 + x + 1')
 plt.xlabel('X')
