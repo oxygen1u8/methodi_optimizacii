@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import math
 import numpy as np
+import mpmath as mp
 import sympy as sp
 
 # f(x) = x^4 + x^2 + x + 1, x э [-1; 0]
@@ -26,6 +27,8 @@ def f_sym(x: sp.Symbol):
 
 def print_res(res_x, res_y, steps):
     print('Min y =', res_y, 'at x =', res_x, 'steps =', steps)
+
+# Задание 1
 
 def method_perebora(a, b, eps):
     n = math.ceil((b - a) / eps)
@@ -122,7 +125,7 @@ def method_zolotogo_secheniya(a, b, eps):
     print_res(res_x, res_y, steps)
     return res_y
 
-def method_parabol(a, b, eps, delta):
+def method_parabol(a, eps, delta):
     res_x = 0
     res_y = 0
     steps = 0
@@ -213,10 +216,9 @@ def method_hord(a, b, eps):
     print_res(res_x, res_y, steps)
     return res_y
 
-def method_newton(a, b, eps, x0):
+def method_newton(func, x0, eps):
     res_y = res_x = steps = 0
     x = sp.symbols('x')
-    func = f_sym(x)
     diff_f = sp.diff(func, x)
 
     while True:
@@ -224,28 +226,131 @@ def method_newton(a, b, eps, x0):
         x1 = x0 - float(diff_f.subs(x, x0)) / float(sp.diff(diff_f, x).subs(x, x0))
         if abs(x1 - x0) < eps:
             res_x = x1
-            res_y = f(res_x)
+            res_y = func.subs(x, res_x)
             break
         x0 = x1
 
     print_res(res_x, res_y, steps)
     return res_y
 
-x = np.linspace(a, b, 1000, endpoint=True)
-y = f(x)
+# Задание 2
+
+x = sp.symbols('x')
+func = f_sym(x)
 
 method_perebora(a, b, eps)
 method_porazryadnogo_poiska(a, b, eps, 0.25)
 method_dihtomia(a, b, eps, eps / 2)
 method_zolotogo_secheniya(a, b, eps)
-method_parabol(a, b, eps, 0.25)
+method_parabol(a, eps, 0.25)
 method_sredney_tochki(a, b, eps)
 method_hord(a, b, eps)
-method_newton(a, b, eps, 2)
+method_newton(func, 2, eps)
+
+# Задание 3
+
+x = np.linspace(a, b, 1000, endpoint=True)
+y = f(x)
 
 plt.title('f(x) = x^4 + x^2 + x + 1')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.grid(visible=True)
 plt.plot(x, y)
+plt.draw()
+
+plt.figure()
+
+# Задание 4
+
+# f(x) = x * arctg(x) - 1/2 * ln(1 + x^2)
+
+def f_sym_(x: sp.Symbol):
+    return x * sp.atan(x) - 1/2 * sp.log(1 + x**2)
+
+def f_(x):
+    return x * np.arctan(x) - 1/2 * np.log(1 + x**2)
+
+x = np.linspace(-10, 10, 1000000, endpoint=True)
+y = f_(x)
+
+plt.title('f(x) = x * arctg(x) - 1/2 * ln(1 + x^2)')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.grid(visible=True)
+plt.plot(x, y)
+plt.draw()
+
+print()
+
+x = sp.symbols('x')
+func = f_sym_(x)
+
+method_newton(func, -1.3, eps)
+
+print()
+
+def method_rafsona(func, x0, eps):
+    res_y = res_x = steps = 0
+    x = sp.symbols('x')
+    diff_f = sp.diff(func, x)
+
+    while True:
+        steps += 1
+        tk = (float(diff_f.subs(x, x0)) ** 2) / (float(diff_f.subs(x, x0)) ** 2 + float(diff_f.subs(x, x0 - float(diff_f.subs(x, x0)) / float(sp.diff(diff_f, x).subs(x, x0)))) ** 2)
+        x1 = x0 - tk * (float(diff_f.subs(x, x0)) / float(sp.diff(diff_f, x).subs(x, x0)))
+        if abs(x1 - x0) < eps:
+            res_x = x1
+            res_y = func.subs(x, res_x)
+            break
+        x0 = x1
+
+    print_res(res_x, res_y, steps)
+    return res_y
+
+def method_markwardta(func, x0, eps):
+    res_y = res_x = steps = 0
+    x = sp.symbols('x')
+    diff_f = sp.diff(func, x)
+
+    while True:
+        steps += 1
+        x1 = x0 - float(diff_f.subs(x, x0)) / (float(sp.diff(diff_f, x).subs(x, x0)) )
+        if abs(x1 - x0) < eps:
+            res_x = x1
+            res_y = func.subs(x, res_x)
+            break
+        x0 = x1
+
+    print_res(res_x, res_y, steps)
+    return res_y
+
+method_rafsona(func, -1.3, eps)
+
+# Задание 5
+
+def f_cos(x):
+    return np.cos(x) / x**2
+
+def f_sin(x):
+    return 1/10*x + 2*np.sin(4*x)
+
+x_cos = np.linspace(1, 12, 10000, endpoint=True)
+y_cos = f_cos(x_cos)
+
+x_sin = np.linspace(0, 4, 10000, endpoint=True)
+y_sin = f_sin(x_sin)
+
+plt.figure()
+
+plt.subplot(2, 1, 1)
+plt.grid()
+plt.title('f(x) = cos(x) / x^2')
+plt.plot(x_cos, y_cos)
+
+plt.subplot(2, 1, 2)
+plt.grid()
+plt.title('f(x) = 1/10*x + 2sin(4x)')
+plt.plot(x_sin, y_sin)
+
 plt.show()
